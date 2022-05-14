@@ -240,3 +240,145 @@ function showConvexHull(ConvexHull, Points)
 
 end
 
+
+function convexHullGiftWrapping( points )
+
+ 
+    n = length(points)
+    
+    if n < 3 
+        return []
+    end
+ 
+    hull=[];
+ 
+    l = 1;
+    for  i in 2:n
+        if points[i].x < points[l].x
+            l = i;
+        end
+    end
+ 
+    p = l
+    q = (p + 1) % n
+          
+    push!(hull,points[p])
+        
+    for i in 1:n
+        if (orientation(points[p], points[i], points[q]) == 2)
+               q = i
+        end
+    end
+ 
+        
+    p = q;
+ 
+    while (p != l)
+            
+        push!(hull,points[p])
+        
+        q = (p + 1) % n
+        for i in 1:n
+            if (orientation(points[p], points[i], points[q]) == 2)
+                   q = i
+            end
+        end
+ 
+        p = q
+            
+    end
+    
+    return hull;
+        
+end
+
+function findSide(p1, p2, p)
+
+    val = (p.y - p1.y) * (p2.x - p1.x) - (p2.y - p1.y) * (p.x - p1.x);
+  
+    if (val > 0)
+        return 1
+    end
+    if (val < 0)
+        return -1
+    end
+    return 0
+    
+end
+  
+function lineDist( p1, p2, p)
+
+    return abs((p.y - p1.y) * (p2.x - p1.x) - (p2.y - p1.y) * (p.x - p1.x))
+    
+end
+  
+function quickHull(points, n, p1, p2, side, hull)
+    ind = 0
+    max_dist = 0
+  
+    for i in 1:n
+        temp = lineDist(p1, p2, points[i]);
+        if (findSide(p1, p2, points[i]) == side) && (temp > max_dist)
+            ind = i;
+            max_dist = temp;
+        end
+    end
+  
+    if ind == 0 
+        
+        if !(p1 in hull)
+            push!(hull,p1)
+        end
+        
+        if !(p2 in hull)
+            push!(hull,p2)
+        end
+        
+        return nothing
+        
+    end
+        
+    quickHull(points, n, points[ind], p1, -findSide(points[ind], p1, p2), hull)
+    quickHull(points, n, points[ind], p2, -findSide(points[ind], p2, p1), hull)
+        
+end
+  
+function convexHullQuickHull(points)
+
+    n = length(points)
+
+    if (n < 3)
+        return []
+    end  
+    
+    min_x = 1
+    max_x = 1
+            
+    for i in 2:n
+                
+        if (points[i].x < points[min_x].x)
+            min_x = i
+        end
+                
+        if (points[i].x > points[max_x].x)
+            max_x = i
+        end
+                
+    end
+  
+    hull = []
+            
+    quickHull(points, n, points[min_x], points[max_x], 1, hull);
+  
+    quickHull(points, n, points[min_x], points[max_x], -1, hull);
+  
+    quickSort(hull, 2, length(hull) , hull[ 1 ])
+    
+    return hull
+                
+end
+
+
+
+
+
