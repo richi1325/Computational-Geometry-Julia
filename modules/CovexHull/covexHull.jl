@@ -55,7 +55,7 @@ function showPoints(points)
     
     x, y = pointsToVectors(points)
 
-    plt = scatter(x,y, color="red")
+    plt = scatter(x,y, color="red",primary=false)
         
     return plt
     
@@ -232,9 +232,9 @@ function showConvexHull(ConvexHull, Points)
     push!(auxx, CHx[ end ])
     push!(auxy, CHy[ end ])
     
-    plt = plot(CHx,CHy, color="blue")
-    plt = scatter!(plt,x,y, color="red")
-    plt = plot!(plt, auxx, auxy,color="blue")
+    plt = plot(CHx,CHy, color="blue",primary=false)
+    plt = scatter!(plt,x,y, color="red",primary=false)
+    plt = plot!(plt, auxx, auxy,color="blue",primary=false)
     
     return plt
 
