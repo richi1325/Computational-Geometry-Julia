@@ -240,3 +240,60 @@ function showConvexHull(ConvexHull, Points)
 
 end
 
+
+function convexHullGiftWrapping( points )
+
+ 
+    n = length(points)
+    
+    if n < 3 
+        return []
+    end
+ 
+    hull=[];
+ 
+    l = 1;
+    for  i in 2:n
+        if points[i].x < points[l].x
+            l = i;
+        end
+    end
+ 
+    p = l
+    q = (p + 1) % n
+          
+    push!(hull,points[p])
+        
+    for i in 1:n
+        if (orientation(points[p], points[i], points[q]) == 2)
+               q = i
+        end
+    end
+ 
+        
+    p = q;
+ 
+    while (p != l)
+            
+        push!(hull,points[p])
+        
+        q = (p + 1) % n
+        for i in 1:n
+            if (orientation(points[p], points[i], points[q]) == 2)
+                   q = i
+            end
+        end
+ 
+        p = q
+            
+    end
+ 
+    
+    return hull;
+        
+end
+
+
+
+
+
