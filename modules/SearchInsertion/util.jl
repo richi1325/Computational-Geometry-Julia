@@ -1,3 +1,16 @@
+mutable struct Vertex
+    value
+    next::Union{Vertex,Nothing}
+    prev::Union{Vertex,Nothing}
+    function Vertex(value::Vector)
+        this = new()
+        this.value = value
+        this.next = nothing
+        this.prev = nothing
+        return this
+    end
+end
+
 mutable struct Polygon
     head::Vertex
     dim::Integer
@@ -40,19 +53,6 @@ mutable struct Segment
     end
 end
 
-mutable struct Vertex
-    value
-    next::Union{Vertex,Nothing}
-    prev::Union{Vertex,Nothing}
-    function Vertex(value::Vector)
-        this = new()
-        this.value = value
-        this.next = nothing
-        this.prev = nothing
-        return this
-    end
-end
-
 function flatpolygon(pol::Polygon)
     vals = [copy(pol.head.value)]
     cur = pol.head.next
@@ -81,4 +81,54 @@ function getvolume(v0::Vector, v1::Vector, v2::Vector, v3::Vector)
     ]
     return det(M)/6
 end
-    
+
+mutable struct Polyhedron
+    faces
+    vertices
+    function Polyhedron(vertices,faces...)
+        this = new()
+        n = length(faces)
+        dim = length(vertices[1])
+        if n < 4
+            throw(error("Polyhedron must have at least 4 faces"))
+        end
+        if dim != 3
+            throw(error("Polyhedron must have elements on 3D"))
+        end
+        this.faces = []
+        for f in faces
+            push!(this.faces, Polygon(vertices[f]...))
+        end
+        this.vertices = collect(vertices)
+        return this
+    end
+end
+
+function Base.show(io::IO, ::MIME"text/html", vertex::Vertex)
+  print(io, k.value)
+end
+
+function Base.show(io::IO, ::MIME"text/html", pol::Polygon)
+    cur = pol.head
+    while true
+        print(io, cur.value)
+        print(io,"->")
+        cur = cur.next
+        if cur == pol.head
+            break
+        end
+    end
+end
+
+function Base.show(io::IO, ::MIME"text/html", seg::Segment)
+    print(io, seg.a)
+    print(io,"->")
+    print(io, seg.b)
+end
+
+function Base.show(io::IO, ::MIME"text/html", hedron::Polyhedron)
+    for vertex in hedron.vertices
+        print(io, vertex)
+        print(io, "--")
+    end
+end
