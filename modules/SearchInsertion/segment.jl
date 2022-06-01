@@ -8,15 +8,16 @@ function find_intersect(s1::Segment, s2::Segment)
     A = hcat(v1,v2)
     try
         x = inv(A) * b
-        if all(0 .<= x .<= 1)
-            return x[1] * v1 + s1.a
+        if !all(0 .<= x .<= 1)
+            return "nointersect", nothing
         end
-        return nothing
+        inters = x[1] * v1 + s1.a
+        if x[1] == 1 || x[2] == 1 || x[1] == 0 || x[2] == 0
+            return "vertex", inters
+        end
+        return "intersect", inters
     catch e
-        if e isa SingularException
-            return nothing
-        end
-        println("something went wrong")
+        return "parallel",nothing
     end
 end
 

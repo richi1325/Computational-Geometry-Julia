@@ -45,10 +45,55 @@ end
 mutable struct Segment
     a::Vector
     b::Vector
+    minx
     function Segment(a, b)
         this = new()
         this.a = a
         this.b = b
+        if this.a[2] > this.b[2]
+            this.minx = this.a[1]
+        else
+            this.minx = this.b[1]
+        end
+        return this
+    end
+end
+
+mutable struct Event
+    seg::Segment
+    seg2
+    p0::Vector
+    p1::Vector
+    inters
+    height
+    typ
+    function Event(seg::Segment,typ::Int)
+        this = new()
+        this.seg = seg
+        if seg.a[2] > seg.b[2]
+            this.p0 = seg.a
+            this.p1 = seg.b
+        else
+            this.p0 = seg.b
+            this.p1 = seg.a
+        end
+        this.typ = typ
+        if typ == 1
+            this.height = this.p0[2]
+        elseif typ == 2
+            this.height = this.p1[2]
+        end
+        #println(this.p0,">",this.p1,"   h:", this.height,"   type:", this.typ)
+        return this
+    end
+    
+    function Event(seg::Segment,seg2::Segment,inters::Vector)
+        this = new()
+        this.seg = seg
+        this.seg2 = seg2
+        this.inters = inters
+        this.typ = 3
+        this.height = inters[2]
         return this
     end
 end
@@ -131,4 +176,82 @@ function Base.show(io::IO, ::MIME"text/html", hedron::Polyhedron)
         print(io, vertex)
         print(io, "--")
     end
+end
+
+function Base.show(io::IO, ::MIME"text/html", eve::Event)
+    if eve.typ == 1
+        print("Insert: ",eve.seg)
+    elseif eve.typ == 2
+        print("Delete: ",eve.seg)
+    elseif eve.typ == 3
+        print("Intersection: ",eve.inters)
+    end
+end
+
+function map_jerarquy(t1)
+    if t1 == 1
+        return 1
+    end
+    if t1 == 2
+        return 3
+    end
+    return 2
+end
+
+function break_tie(e1,e2)
+    if (e1.typ == e2.typ == 3)
+        return e1.inters[1] < e2.inters[1]
+    end
+    if (e1.typ == e2.typ == 2)
+        return e1.p1[1] < e2.p1[1]
+    end
+    return e1.p0[1] > e2.p0[1]
+end
+
+function Base.:<(e1::Event,e2::Event)
+    if e1.height == e2.height
+        j1 = map_jerarquy(e1.typ)
+        j2 = map_jerarquy(e2.typ)
+        if j1 == j2
+            return break_tie(e2,e1)
+        end
+        if j1 < j2
+            return true
+        end
+        return false
+    end
+    return e1.height > e2.height
+end
+
+function Base.:>(e1::Event,e2::Event)
+    if e1.height == e2.height
+        j1 = map_jerarquy(e1.typ)
+        j2 = map_jerarquy(e2.typ)
+        if j1 == j2
+            return break_tie(e1,e2)
+        end
+        if j1 > j2
+            return true
+        end
+        return false
+    end
+    return e1.height < e2.height
+end
+
+function Base.:(==)(e1::Event,e2::Event)
+    if e1.typ != e2.typ
+        return false
+    end
+    if e1.typ == 1 || e1.typ == 2
+        return e1.p0 == e2.p0 && e1.p1 == e2.p1
+    end
+    return e1.inters == e2.inters
+end
+
+function Base.:<(s1::Segment,s2::Segment)
+    return s1.minx < s2.minx
+end
+
+function Base.:>(s1::Segment,s2::Segment)
+    return s1.minx > s2.minx
 end
