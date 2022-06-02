@@ -1,25 +1,107 @@
-include("segment.jl")
-include("util.jl")
+include("_types.jl")
+include("_util.jl")
+using LinearAlgebra
 using DataStructures
 
-function inout(inters, inflag, aHB, bHA)
-    if aHB > 0
-        return "Pin"
+function intersects(seg::Segment, pol::Polygon)
+    vals = []
+    a = seg.a
+    b = seg.b
+    cur = pol.head
+    while true
+        vol = getvolume(b, cur.value, cur.next.value, a)
+        push!(vals, vol)
+        cur = cur.next
+        if cur == pol.head
+            break
+        end
     end
-    if bHA > 0
-        return "Qin"
+    positives = sum(vals .> 0)
+    negatives = sum(vals .< 0)
+    if positives == 3 || negatives == 3
+        return "inside"
     end
-    return inflag
+    if positives > 0 && negatives > 0
+        return "outside"
+    end
+    if positives == 1 || negatives == 1
+        return "vertex"
+    end
+    if positives == 2  || negatives == 2
+        return "edge"
+    end
 end
 
-function advance(a, aa, n, inside, v)
-    if inside
-        return (a+1)%n, aa+1, v
+function find_intersect(s1::Segment, s2::Segment)
+    v1 = s1.b - s1.a
+    v2 = s2.a - s2.b
+    b = s2.a - s1.a
+    A = hcat(v1,v2)
+    try
+        x = inv(A) * b
+        if !all(0 .<= x .<= 1)
+            return "nointersect", nothing
+        end
+        inters = x[1] * v1 + s1.a
+        if x[1] == 1 || x[2] == 1 || x[1] == 0 || x[2] == 0
+            return "vertex", inters
+        end
+        return "intersect", inters
+    catch e
+        return "parallel",nothing
     end
-    return (a+1)%n, aa+1, nothing
 end
 
-function convpol_intersect(P::Polygon, Q::Polygon)
+function find_intersect(seg::Segment, pol::Polygon)
+    v1 = seg.b - seg.a
+    # Get the normal
+    v2 = pol.head.prev.value - pol.head.value
+    v3 = pol.head.next.value - pol.head.value
+    n = cross(v2,v3)
+    # Get real for vectorial's line form
+    t = dot(pol.head.value - seg.a, n) / dot(v1,n)
+    if 0 > t ||  t > 1
+        return "outside",nothing
+    end
+    point = seg.a + t*v1
+    axis = argmax(abs.(n))
+    pol2d = Polygon([deleteat!(v,axis) for v in flatpolygon(pol)]...)
+    point2d = copy(point)
+    deleteat!(point2d, axis)
+    areasign = []
+    cur = pol2d.head
+    while true
+        push!(areasign, getarea(cur.value,cur.next.value, point2d))
+        cur = cur.next
+        if cur == pol2d.head
+            break
+        end
+    end
+    positives = sum(areasign .> 0)
+    negatives = sum(areasign .< 0)
+    if positives > 0 && negatives > 0
+        return "outside",nothing
+    end
+    code = ""
+    if t == 0
+        code *= "first_"
+    end
+    if t == 1
+        code *= "second_"
+    end
+    if positives == 3 || negatives == 3
+        code *= "inside"
+    end
+    if positives == 1 || negatives == 1
+        code *= "vertex"
+    end
+    if positives == 2  || negatives == 2
+        code *= "edge"
+    end
+    return code, point
+end
+
+function find_intersect(P::Polygon, Q::Polygon)
     inflag = "unknown"
     first_point = true
     p0 = nothing
@@ -82,7 +164,7 @@ function convpol_intersect(P::Polygon, Q::Polygon)
     return Polygon(interpol...)
 end
 
-function segments_intersects(segs...)
+function find_intersects(segs...)
     Q = AVLTree()
     L = AVLTree()
     for seg in segs
