@@ -1,7 +1,9 @@
 include("_types.jl")
 include("_util.jl")
-using LinearAlgebra
-using DataStructures
+import LinearAlgebra
+import DataStructures
+const la = LinearAlgebra
+const ds = DataStructures
 
 function intersects(seg::Segment, pol::Polygon)
     vals = []
@@ -43,8 +45,11 @@ function find_intersect(s1::Segment, s2::Segment)
             return "nointersect", nothing
         end
         inters = x[1] * v1 + s1.a
-        if x[1] == 1 || x[2] == 1 || x[1] == 0 || x[2] == 0
+        if xor(x[1] == 1, x[2] == 1, x[1] == 0, x[2] == 0 )
             return "vertex", inters
+        end
+        if x[1] == 1 || x[2] == 1 || x[1] == 0 || x[2] == 0
+            return "adjacent", inters
         end
         return "intersect", inters
     catch e
@@ -57,9 +62,9 @@ function find_intersect(seg::Segment, pol::Polygon)
     # Get the normal
     v2 = pol.head.prev.value - pol.head.value
     v3 = pol.head.next.value - pol.head.value
-    n = cross(v2,v3)
+    n = la.cross(v2,v3)
     # Get real for vectorial's line form
-    t = dot(pol.head.value - seg.a, n) / dot(v1,n)
+    t = la.dot(pol.head.value - seg.a, n) / la.dot(v1,n)
     if 0 > t ||  t > 1
         return "outside",nothing
     end
