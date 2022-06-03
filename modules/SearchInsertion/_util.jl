@@ -255,7 +255,7 @@ function plot(vg::Dict; color=:red, width=5)
             end
             x = [k[1],v[1]]
             y = [k[2],v[2]]
-            plotin = Plots.plot!(x,y;marker=marker,linecolor=color, linewidth=width, legend=false)
+            Plots.plot!(x,y;marker=marker,linecolor=color, linewidth=width, legend=false)
         end
     end
     return plotin
