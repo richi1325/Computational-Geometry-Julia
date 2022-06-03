@@ -245,10 +245,13 @@ end
 
 function plot(vg::Dict; color=:red, width=5)
     marker=(:circle,5,color)
-    # plot visibility graph
-    Plots.plot()
+    first = true
     for (k,vals) in vg
         for (v,d) in vals
+            if first
+                first = false
+                Plots.plot(Vertex(v),color=:white)
+            end
             x = [k[1],v[1]]
             y = [k[2],v[2]]
             pi = Plots.plot!(x,y;marker=marker,linecolor=color, linewidth=width, legend=false)
@@ -256,7 +259,7 @@ function plot(vg::Dict; color=:red, width=5)
     end
 end
 
-function plot(vg::Dict; color=:red, width=5)
+function plot!(vg::Dict; color=:red, width=5)
     marker=(:circle,5,color)
     # plot visibility graph
     for (k,vals) in vg
