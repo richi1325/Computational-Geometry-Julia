@@ -89,8 +89,13 @@ mutable struct Event
     
     function Event(seg::Segment,seg2::Segment,inters::Vector)
         this = new()
-        this.seg = seg
-        this.seg2 = seg2
+        if seg.a[1] < seg2.a[1]
+            this.seg = seg
+            this.seg2 = seg2
+        else
+            this.seg = seg2
+            this.seg2 = seg
+        end
         this.inters = inters
         this.typ = 3
         this.height = inters[2]

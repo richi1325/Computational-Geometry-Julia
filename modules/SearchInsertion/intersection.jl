@@ -169,33 +169,36 @@ function find_intersect(P::Polygon, Q::Polygon)
     return Polygon(interpol...)
 end
 
+
 function find_intersects(segs...)
-    Q = AVLTree()
-    L = AVLTree()
+    Q = ds.AVLTree()
+    L = ds.AVLTree()
+    intersections = []
     for seg in segs
         push!(Q, Event(seg,1))
         push!(Q, Event(seg,2))
     end
+
     while length(Q) > 0
         event = Q[1]
         delete!(Q, Q[1])
         if event.typ == 1
             push!(L, event.seg)
-            rank = sorted_rank(L, event.seg)
-            if rank-1 >= 1
-                code,inters = find_intersect(L[rank],L[rank-1])
-                if inters != nothing
-                    push!(Q,Event(L[rank],L[rank-1],inters))
-                end
+            rank = ds.sorted_rank(L, event.seg)
+        if rank-1 >= 1
+            code,inters = find_intersect(L[rank],L[rank-1])
+            if inters != nothing
+                push!(Q,Event(L[rank],L[rank-1],inters))
             end
-            if rank+1 <= length(L)
-                code,inters = find_intersect(L[rank],L[rank+1])
-                if inters != nothing
-                    push!(Q,Event(L[rank],L[rank+1],inters))
-                end
+        end
+        if rank+1 <= length(L)
+            code,inters = find_intersect(L[rank],L[rank+1])
+            if inters != nothing
+                push!(Q,Event(L[rank],L[rank+1],inters))
             end
+        end
         elseif event.typ == 2
-            rank = sorted_rank(L,event.seg)
+            rank = ds.sorted_rank(L,event.seg)
             if rank-1 >= 1 && rank+1 <= length(L)
                 code,inters = find_intersect(L[rank-1],L[rank+1])
                 if inters != nothing
@@ -204,17 +207,34 @@ function find_intersects(segs...)
             end
             delete!(L, L[rank])
         elseif event.typ == 3
-            println(event.inters)
+            push!(intersections,((event.seg,event.seg2),event.inters))
             aux = 0
             s1 = event.seg
             s2 = event.seg2
-            r1 = sorted_rank(L,s1)
+            r1 = ds.sorted_rank(L,s1)
             delete!(L,L[r1])
-            r2 = sorted_rank(L,s2)
+            r2 = ds.sorted_rank(L,s2)
             delete!(L,L[r2])
             s1.minx, s2.minx = s2.minx, s1.minx
             push!(L,s1)
             push!(L,s2)
+            rank1 = ds.sorted_rank(L,s1)
+            rank2 = ds.sorted_rank(L,s2)
+            rankmin = min(rank1,rank2)
+            rankmax = max(rank1,rank2)
+            if ((rankmin-1) >= 1) && !((L[rankmin-1],L[rankmin]) in [sgs for (sgs,i) in intersections])
+                code,inters = find_intersect(L[rankmin],L[rankmin-1])
+                if inters != nothing
+                    push!(Q,Event(L[rankmin],L[rankmin-1],inters))
+                end
+            end
+            if ((rankmax+1) <= length(L)) && !((L[rankmax],L[rankmax+1]) in [sgs for (sgs,i) in intersections])
+                code,inters = find_intersect(L[rankmax],L[rankmax+1])
+                if inters != nothing
+                    push!(Q,Event(L[rankmax],L[rankmax+1],inters))
+                end
+            end
         end
     end
+    return [i for (segs,i) in intersections]
 end
