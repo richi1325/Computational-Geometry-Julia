@@ -1,5 +1,5 @@
 # Computational Geometry in Julia
-Este proyecto es una implementación de algunos algoritmos y códigos mostrados en el libro "Computational Geometry in C Second Edition (1998)" del autor: "Joseph O'Rourke" en el lenguaje de programación [Julia](https://julialang.org/), para la asignatura "Temas Selectos de Matemáticas II", perteneciente a la currícula de la licenciatura en Matemáticas Aplicadas y Computación de la División de Matemáticas e Ingeniería del plan de estudios 2014.
+Este proyecto es una implementación de algunos algoritmos y códigos mostrados en: "J. O’Rourke (1998), Computational Geometry In C, Cambridge University Press." en el lenguaje de programación [Julia](https://julialang.org/), para la asignatura "Temas Selectos de Matemáticas II", perteneciente a la currícula de la licenciatura en Matemáticas Aplicadas y Computación de la División de Matemáticas e Ingeniería del plan de estudios 2014.
 
 ***
 ## Instrucciones
