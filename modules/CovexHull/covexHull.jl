@@ -1,12 +1,5 @@
 using Plots
 
-
-mutable struct convexHull
-
-    points::Array{BigInt,1}
-    
-end
-
 mutable struct Point
     x
     y
