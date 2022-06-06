@@ -10,5 +10,23 @@ Esto generará un contenedor, para acceder a él es necesario ejecutar el siguie
 ```bash
 docker-compose up -d --build
 ```
-
 Ahora puede interactuar con el proyecto accediendo a: `127.0.0.1/lab` 
+
+Si por el contrario desea detener el servicio, simplemente debe correr el siguiente código, esto dentendrá el contenedor y liberará el puerto `80`:
+```bash
+docker-compose down
+```
+***
+## modules
+
+Esta carpeta contiene la implementación de los algoritmos en archivos con la extención `*.jl` (_Script de Julia_), separados de los notebooks para mantener a estos más legibles y para que los módulos puedan ser reutilizados o copiados para algún proyecto personal.
+
+***
+## Implementaciones
+
+Es esta carpeta puede encontrar ejemplos implementando los algoritmos que desarrollamos de las diferentes unidades que contempló nuestro curso, cada unidad cuenta con al menos los siguientes archivos:
+
+| Archivo   	  | Descripción                                                                                  |
+|-----------------|----------------------------------------------------------------------------------------------|
+| `README.md`     | Contiene la lista de temas que contemplaba el temario para la respectiva unidad.             |
+| `main.ipynb`    | Es un notebook de Julia con algunos ejemplos implementando los algoritmos que desarrollamos. |
