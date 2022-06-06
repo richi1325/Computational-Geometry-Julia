@@ -109,9 +109,9 @@ mutable struct Planoclass
          function Planoclass()
                this=new()
                this.s_num = 0
-               this.sfaces=tFace(this.sfaces::tFace)
-               this.spots=tVertex(this.spots::tVertex)
-               this.sedges=tEdge(this.sedges::tEdge)
+               this.sfaces=tFace(tFace)
+               this.spots=tVertex(tVertex)
+               this.sedges=tEdge(tEdge)
                return this
 
          end
@@ -470,10 +470,7 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
      _MakeFace=function(a,b,c,fold )
 
                  if( !fold ) 
-                            e0,e1,e2
-                            tEdge(e0)
-                            tEdge(e1)
-                            tEdge(e2)  
+                            e0,e1,e2  
    
                  else  
                              e0 = fold.edge3
