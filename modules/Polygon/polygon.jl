@@ -31,37 +31,44 @@ mutable struct Polygon
 end
 
 function Base.getproperty(this::Polygon, s::Symbol)
-    #Métodos privados    
+    #-----------------------------------------------------------------------------
+    # Devuelve el doble del área con signo del triángulo determinada por a, b y c.
+    # El área es positiva si a, b y c están orientadas hacia la izquierda
+    # El área es negativa si está orientado hacia la derecha, y
+    # cero si los puntos son colineales.
+    #----------------------------------------------------------------------------
     _Area = function(a, b, c)
-        return 0.5*((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y))
+        return (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)
     end
     
-    _AreaSign = function(a, b, c)
-        area = _Area(a, b, c)
-        if area > 0.0000001
-            return 1
-        elseif area < -0.0000001
-            return -1
-        else
-            return 0
-        end
-    end
-    
+    #-----------------------------------------------------------------------------
+    # Devuelve verdadero sii c está estrictamente a la izquierda del segmento ab.
+    #-----------------------------------------------------------------------------
     _Left = function(a, b, c) 
-        return _AreaSign(a, b, c) > 0
+        return _Area(a, b, c) > 0
     end
 
+    #-----------------------------------------------------------------------------
+    # Devuelve verdadero sii c está a la izquierda o es colineal al segmento ab.
+    #-----------------------------------------------------------------------------
     _LeftOn = function(a, b, c) 
-        return _AreaSign(a, b, c) >= 0
+        return _Area(a, b, c) >= 0
     end
     
+    #-----------------------------------------------------------------------------
+    # Devuelve verdadero sii c es colineal al segmento ab.
+    #-----------------------------------------------------------------------------
     _Collinear = function(a, b, c) 
-        return _AreaSign(a, b, c) == 0
+        return _Area(a, b, c) == 0
     end
-    
+
+    #-----------------------------------------------------------------------------
+    # Devuelve verdadero si la diagonal ab es estrictamente interna al
+    # polígono en la vecindad del punto final a.
+    #-----------------------------------------------------------------------------
     _InCone = function(a, b)
-        a1 = a.next;
-        a0 = a.prev;
+        a1 = a.next
+        a0 = a.prev
         if _LeftOn(a, b, a1)
             return _Left(a, b, a0) && _Left(b, a, a1)
         else
@@ -69,10 +76,18 @@ function Base.getproperty(this::Polygon, s::Symbol)
         end
     end
     
+    #-----------------------------------------------------------------------------
+    # O exclusivo: Es verdadero si exactamente un argumento es verdadero.
+    #-----------------------------------------------------------------------------
     _Xor = function (x, y)
         return x ⊻ y
     end 
-    
+
+    #-----------------------------------------------------------------------------
+    # Devuelve verdadero si ab intersecta correctamente a cd (ambos segmentos 
+    # comparten un punto interior). La propiedad de la intersección se asegura mediante
+    # el uso estricto de la izquierda.
+    #-----------------------------------------------------------------------------
     _IntersectProp = function(a,b,c,d)
        if (
           _Collinear(a,b,c) ||
@@ -81,13 +96,18 @@ function Base.getproperty(this::Polygon, s::Symbol)
           _Collinear(c,d,b)
         )
             return false
+        else
+            return _Xor(_Left(a, b, c), _Left(a, b, d)) && 
+                   _Xor(_Left(c, d, a), _Left(c, d, b))
         end
-        return _Xor(_Left(a, b, c), _Left(a, b, d)) && 
-                _Xor(_Left(c, d, a), _Left(c, d, b))
     end
 
+    #-----------------------------------------------------------------------------
+    # Devuelve verdadero si el punto c se encuentra en el segmento cerrado ab.
+    # Primero se comprueba que c es colineal con a y b.
+    #-----------------------------------------------------------------------------
     _Between = function(a, b, c)
-        if !_Collinear(a, b, c)
+        if !(_Collinear(a, b, c))
             return false
         elseif a.x != b.x 
             return ((a.x <= c.x) && (c.x <= b.x)) ||
@@ -97,7 +117,10 @@ function Base.getproperty(this::Polygon, s::Symbol)
                     ((a.y >= c.y) && (c.y >= b.y))
         end
     end
-    
+
+    #-----------------------------------------------------------------------------
+    # Devuelve verdadero si los segmentos ab y cd se cruzan, correcta o incorrectamente.
+    #-----------------------------------------------------------------------------
     _Intersect = function(a, b, c, d)
         if _IntersectProp(a, b, c, d)
             return true
@@ -112,6 +135,10 @@ function Base.getproperty(this::Polygon, s::Symbol)
         end
     end
 
+    #-----------------------------------------------------------------------------
+    # Devuelve verdadero si ab es una diagonal propia interna o externa de P
+    # Ignorando las aristas incidentes a "a" y "b".
+    #-----------------------------------------------------------------------------
     _Diagonalie = function(a, b)
         c = this.pol
         while true
@@ -120,16 +147,19 @@ function Base.getproperty(this::Polygon, s::Symbol)
                 && (c != b) && (c1 != b)
                 && _Intersect(a, b, c, c1)
             )
-                 return false
+                return false
             end
             c = c.next;
-            if c==this.pol
+            if c == this.pol
                 break
             end
         end
         return true
     end
 
+    #-----------------------------------------------------------------------------
+    # Devuelve verdadero si ab es una diagonal propia interna.
+    #-----------------------------------------------------------------------------
     _Diagonal = function (a, b)
         return _InCone(a, b) && _InCone(b, a) && _Diagonalie(a, b)
     end
@@ -146,11 +176,6 @@ function Base.getproperty(this::Polygon, s::Symbol)
             end
         end
     end        
-
-    _PrintDiagonal = function (a, b)
-       print("$(a.x)\t$(a.y)\tmoveto\n")
-       print("$(b.x)\t$(b.y)\tlineto\n")
-    end
 
     if s == :Insertar
         function(route)
@@ -174,6 +199,7 @@ function Base.getproperty(this::Polygon, s::Symbol)
                     this.pol.prev = aux2
                 end
             end
+            _EarInit()
         end
     elseif s == :Plot
         function()
@@ -206,28 +232,35 @@ function Base.getproperty(this::Polygon, s::Symbol)
                     break
                 end
             end
-            return sum
+            return 0.5*sum
         end
     elseif s == :Triangular
-        function()
-            _EarInit()
+        function(plot_pol = true)
             temp = deepcopy(this.pol)
+            diagonales_plot = []
             diagonales = []
-            while this.v_num > 3 
+            n = this.v_num
+            while n > 3
+                earfound = false
                 v2 = this.pol
                 while true
                     if v2.ear
+                        earfound = true
                         v3 = v2.next
                         v4 = v3.next
                         v1 = v2.prev
                         v0 = v1.prev
-                        push!(diagonales,[[v1.x,v3.x],[v1.y,v3.y]])
+                        
+                        push!(diagonales_plot,[[v1.x,v3.x],[v1.y,v3.y]])
+                        push!(diagonales,[[v1.x,v1.y],[v3.x,v3.y]])
+                        
                         v1.ear = _Diagonal(v0, v3)
                         v3.ear = _Diagonal(v1, v4)
+                        
                         v1.next = v3
                         v3.prev = v1
                         this.pol = v3
-                        this.v_num -= 1
+                        n -= 1
                         break
                     end
                     v2 = v2.next
@@ -235,13 +268,19 @@ function Base.getproperty(this::Polygon, s::Symbol)
                         break
                     end
                 end
+                if !earfound
+                    _EarInit()
+                end
             end
             this.pol = temp
-            plotin = this.Plot()
-            for i=1:length(diagonales)
-                plotin = plot!(diagonales[i][1], diagonales[i][2],color="blue",primary = false)
+            if plot_pol
+                plotin = this.Plot()
+                for i=1:length(diagonales_plot)
+                    plotin = plot!(diagonales_plot[i][1], diagonales_plot[i][2],color="blue",primary = false)
+                end
+                display(plotin)
             end
-            display(plotin)
+            return diagonales
         end
     else
         getfield(this, s)
