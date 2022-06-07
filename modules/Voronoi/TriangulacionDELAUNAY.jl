@@ -41,7 +41,7 @@ function tVertex(tVertex)
        tVertex.prev = nothing
        tVertex.vnum = nothing
        return tVertex
-    end
+end
 
 mutable struct tEdge
      
@@ -53,7 +53,7 @@ mutable struct tEdge
      delete::Bool  
      next::Array{1}
      prev::Array{1}
-     
+    
 end
 function tEdge(tEdge)
 
@@ -127,15 +127,15 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
          Flower= 0    
 
          while true 
-              if ( _Normz( f11 )< 0 ) 
+                if ( _Normz( f11 )< 0 ) 
                        Flower=Flower+1
                        f11.lower=true 
                
        
-            else f11.lower= false
+               else f11.lower= false
                end
                f11 = f11.next
-               if f11==faces
+               if(f11==faces)
                     break
                end
          end
@@ -230,10 +230,8 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
  
     _ConstructHull=function()
 
-     vol
-     changed   #T if addition changes hull  not used. */
-
-     v = vertices
+     
+       v=vertices
       while true
         vnext = v.next
         if ( !v.mark ) 
@@ -246,8 +244,8 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
 	         _Checks()
            end
         end
-        v = vnext
-        if v==vertices
+        v=vnext
+        if(v==vertices)
              break
         end
        end
@@ -385,7 +383,7 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
                        e=temp
                   
              end
-             if e==edges
+             if(e==edges)
                     break
              end
          end
@@ -425,7 +423,7 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
       _MakeCcw( new_face, e11, p )
         
       #Set the adjacent face pointers. */
-      for i=0:2
+        for i=0:2
          
 	 #Only one NULL link should be set to new_face. */
              if ( !new_edge[i].adjface1 ) 
@@ -437,10 +435,10 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
 	                 break
              end
          
-       end
+        end
         
-      return new_face
-     end
+        return new_face
+    end
      _MakeCcw=function(fs,e,p)
       
             if(e.adjface1.visible==true)      
@@ -459,10 +457,11 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
                               fs.vertex[1] = e.endpts2    
                               _SWAP( s1,fs.edge2,fs.edge3 )
                      end
-                 end
-                 if fv.vertex[i]==e.endpts1
-                      break
-                 end
+                 
+                     if (fv.vertex[i]==e.endpts1)
+                         break
+                    end
+                end
            end
    
              fs.vertex[2]=p
@@ -644,7 +643,7 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
            end
            e = e.next
          
-           if e==edges
+           if(e==edges)
                  break
            end
 
@@ -670,7 +669,7 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
                                 end
                       end
                      f = f.next
-                     if f==faces
+                     if(f==faces)
                          break
                      end
 
@@ -793,7 +792,7 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
             plotin = plot(x, y,z,color="black",primary = false)
             plotin = scatter!(x,y,z,color="blue",primary = false)
             return plotin
-          end
+        end
     elseif sym ==:T_DELAUNAY
             function(plot_pol = true)
        
