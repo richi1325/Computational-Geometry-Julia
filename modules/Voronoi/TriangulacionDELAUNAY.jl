@@ -109,9 +109,9 @@ mutable struct Planoclass
          function Planoclass()
                this=new()
                this.s_num = 0
-               this.sfaces=tFace(tFace)
-               this.spots=tVertex(tVertex)
-               this.sedges=tEdge(tEdge)
+               this.sfaces=tFace(this.sfaces)
+               this.spots=tVertex(this.spots)
+               this.sedges=tEdge(this.sedges)
                return this
 
          end
@@ -121,6 +121,7 @@ end
 function Base.getproperty(this::Planoclass, sym::Symbol)
         #Métodos privados
      _LowerFaces=function()
+        {
 
          f11= faces 
   
@@ -141,21 +142,17 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
          end
          
         
-        
-     end
+      }  
+    end
      _SubVec=function( a,b,c)
-
+      {
          c.x = a.x - b.x
          c.y = a.y - b.y
          c.z = a.z - b.z
-
+      }
      end
    _DoubleTriangle=function()
-
-      v00,v1,v2,v3,t 
-      f0,f1 
-      e0,e1, e2
-      vol
+    {
       v00 = vertices
       aux=v00.next
       while ( _Collinear( v00, v00.next, aux.next ) )
@@ -196,11 +193,11 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
        #Insure that v3 will be the first added. */
       vertices = v3
          
-       
+       }
 
     end
      _DELETE=function(head, p )
-          if ( head )  
+        {  if ( head )  
               if ( head == head.next ) 
                         head =nothing
               elseif ( p == head ) 
@@ -211,14 +208,14 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
               p.prev.next = p.next
               _FREE( p )
           end
-        return p
+        return p}
      end
     _SWAP=function(t,x,y)
-            
+      {      
             t = x
             x = y
             y = t
-           return t,x,y
+           return t,x,y}
     end
     _FREE=function(p)
             if (p) 
@@ -229,7 +226,7 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
     end
  
     _ConstructHull=function()
-
+        {
      
        v=vertices
       while true
@@ -248,16 +245,13 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
         if(v==vertices)
              break
         end
-       end
+        end}
     
     end
     
      _VolumeSign=function( f33, p )
-     
-               vol
-               voli 
-               ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz
-              bxdx, bydy, bzdz, cxdx, cydy, czdz
+     {
+               
 
              ax = f33.vertex[0].x
              ay = f33.vertex[0].y
@@ -289,16 +283,12 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
                       return -1
                   else  return  0
                   
-                                                
-             end
-    end
+                                            
+              end}
+   end
     _Volumei=function(fu, p )
 
-         vol
-         ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz
-         bxdx, bydy, bzdz, cxdx, cydy, czdz
-         vold
-          i
+        { 
 
              ax = fu.vertex[0].x
              ay = fu.vertex[0].y
@@ -321,10 +311,10 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
             czdz=cz-dz
              vol =(az-dz)*(bxdx*cydy-bydy*cxdx) + (ay-dy)*(bzdz*cxdx-bxdx*czdz)+ (ax-dx)*(bydy*czdz-bzdz*cydy)
 
-            return vol
+            return vol}
      end
      _Volumed=function(f4,p)
-
+   {
             
              
              ax = f4.vertex[0].x
@@ -348,10 +338,10 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
             czdz=cz-dz
             vol = (az-dz)*(bxdx*cydy-bydy*cxdx)+(ay-dy)*(bzdz*cxdx-bxdx*czdz)+(ax-dx)*(bydy*czdz-bzdz*cydy)
 
-            return vol
+            return vol}
      end
      _AddOne=function(p) 
-        vis = false 
+        {vis = false 
         f22 = faces
         while true
               vol=_VolumeSign(f22, p)
@@ -387,18 +377,13 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
                     break
              end
          end
-         return true
+         return true}
      end
     _MakeConeFace=function(e11, p)
-                                                
-        new_edge3
-        new_face
-        i, j 
+       {                                         
+        
 
-  #Make two new edges (if don't already exist). */
-     
-     # /* If the edge exists, copy it into new_edge. */
-        if ( !( new_edge1 = e11.endpts1.duplicate) ) 
+         if ( !( new_edge1 = e11.endpts1.duplicate) ) 
                                                     
         #Otherwise (duplicate is NULL), MakeNullEdge. */
 	         new_edge1 
@@ -420,28 +405,34 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
       new_face.edge1 = e11
       new_face.edge2 = new_edge1
       new_face.edge3 = new_edge2
-      _MakeCcw( new_face, e11, p )
+      _MakeCcw(new_face, e11, p )
         
-      #Set the adjacent face pointers. */
-        for i=0:2
+      
          
-	 #Only one NULL link should be set to new_face. */
-             if ( !new_edge[i].adjface1 ) 
-	                 new_edge[i].adjface1 = new_face
-	                 break
+             if (!new_edge1.adjface1 ) 
+	                 new_edge1.adjface1 = new_face
+	                 
              end
-             if ( !new_edge[i].adjface2 ) 
-	                 new_edge[i].adjface2 = new_face
-	                 break
+             if ( !new_edge1.adjface2 ) 
+	                 new_edge1.adjface2 = new_face
+	                 
+             end
+             if (!new_edge2.adjface1 ) 
+	                 new_edge2.adjface1 = new_face
+	                 
+             end
+             if ( !new_edge2.adjface2 ) 
+	                 new_edge2.adjface2 = new_face
+	                 
              end
          
-        end
         
-        return new_face
+        return new_face 
+        }
     end
      _MakeCcw=function(fs,e,p)
       
-            if(e.adjface1.visible==true)      
+          {  if(e.adjface1.visible==true)      
                    fv= e.adjface1
             else fv= e.adjface2
             end
@@ -464,11 +455,11 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
                 end
            end
    
-             fs.vertex[2]=p
+             fs.vertex[2]=p}
      end
      _MakeFace=function(a,b,c,fold )
 
-                 if( !fold ) 
+              {   if( !fold ) 
                             e0,e1,e2  
    
                  else  
@@ -495,12 +486,12 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
                 #/* Link edges to face. */
                 e0.adjface1= e1.adjface1= e2.adjface1= fss
 
-               return fss
+               return fss}
      end
      
      _CleanEdges1=function()
 
-                e = edges
+              {  e = edges
                 while true 
 
                           if ( e.newface )  
@@ -536,12 +527,12 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
                          if(e== edges)
                             break
                          end
-                end
+        end}
                
       end
       _CleanFaces=function()
 
-	            
+	        {    
                 
                 while ( faces && faces.visible ) 
                                f = faces
@@ -559,12 +550,12 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
                             if(f==faces)
                                  break
                             end
-                 end
+        end}
      end
     
      _CleanVertices=function()
         
-                 
+             {    
                 e = edges
                 while true
                         e.endpts1.onhull = e.endpts2.onhull = ONHULL
@@ -601,32 +592,32 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
                                         break
                       end
                  end
-              
+              }
       end
       _CleanUp=function()
 
-            _CleanEdges1()
+         {   _CleanEdges1()
             _CleanFaces()
-            _CleanVertices()
+            _CleanVertices()}
       end
 
       _Collinear=function( a, b,c )
-
+{
         return ( c.z - a.z ) * ( b.y - a.y ) -( b.z - a.z ) * ( c.y - a.y) == 0&&
               ( b.z - a.z ) * ( c.x - a.x ) -( b.x - a.x ) * ( c.z - a.z ) == 0&&
-              ( b.x - a.x ) * ( c.y - a.y ) -( b.y  - a.y  ) * ( c.x - a.x ) == 0  
+              ( b.x - a.x ) * ( c.y - a.y ) -( b.y  - a.y  ) * ( c.x - a.x ) == 0  }
        end
 
       _Normz=function( f )
-          
+        {  
          a = f.vertex[0]
          b = f.vertex[1]
          c = f.vertex[2]
 
-         return ( b.x - a.x) * ( c.y - a.y ) -( b.y - a.y ) * ( c.x - a.x )
+         return ( b.x - a.x) * ( c.y - a.y ) -( b.y - a.y ) * ( c.x - a.x )}
       end
       _Consistency=function()
-
+       {
         e = edges
 
         while true
@@ -648,11 +639,11 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
            end
 
         end
-
+}
       end
       _Convexity=function( )
 
-              f = faces
+          {    f = faces
    
               while true
                       v = vertices
@@ -674,11 +665,11 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
                      end
 
               end
-
+}
         
       end
       _CheckEuler=function(V, E, F )
-
+{
              if ( check )
                      println(  "Checks: V, E, F = %d %d %d:\t", V, E, F)
              end
@@ -702,10 +693,10 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
              elseif ( check ) 
                       println( "2E = 3F\n")
                   
-             end
+        end}
       end
      _Checks=function()
-
+{
              V=0
              E=0
              F=0
@@ -741,7 +732,7 @@ function Base.getproperty(this::Planoclass, sym::Symbol)
                     end
                 end
             end
-          _CheckEuler( V, E, F )
+          _CheckEuler( V, E, F )}
     end
     
     if sym ==:Insertar
